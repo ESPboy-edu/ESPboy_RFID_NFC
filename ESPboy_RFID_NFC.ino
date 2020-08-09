@@ -43,20 +43,35 @@ uint8_t uidLength;
 uint8_t keya[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
 enum commands{
-  READ=1,
-  WRITEB,
-  STORE,
-  EMULAT,
-  FORMAT
+  MiREAD=1,
+  MiWRITEB,
+  MiSTORE,
+  MiEMULAT,
+  MiFORMAT,
+  MiMIMIC,
+  MiWRITEC,
+  NTGread,
+  NTGwrite,
+  NTGstore,
+  NTGerase,
+  NTGupdate
 }cmd;
 
 uint8_t commandMatrice[][2] = {
-  {'r', READ},
-  {'w', WRITEB},
-  {'s', STORE},
-  {'e', EMULAT},
-  {'f', FORMAT},
-  {0,0},
+  {'r', MiREAD},
+  {'w', MiWRITEB},
+  {'c', MiWRITEC},
+  {'s', MiSTORE},
+  {'e', MiEMULAT},
+  {'f', MiFORMAT},
+  {'m', MiMIMIC},
+  {'c', MiWRITEC},
+  {'a', NTGread},
+  {'t', NTGwrite},
+  {'o', NTGstore},
+  {'z', NTGerase},
+  {'u', NTGupdate},  
+  {0,0}
 };
 
 
@@ -333,13 +348,13 @@ void loop() {
     rdCommand = GUIobj->getUserInput();
     
   switch (getCommand(rdCommand[0])){
-    case READ: 
+    case MiREAD: 
       readCard();
       break;
-    case WRITEB:
+    case MiWRITEB:
       writeBlock();
       break;
-    case FORMAT:
+    case MiFORMAT:
       formatCard();
       break;
     default:
