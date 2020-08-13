@@ -58,7 +58,6 @@ private:
   static uint16_t *consoleStringsColor;
 
   uint8_t keysAction();
-	void toggleDisplayMode(uint8_t mode);
 	void drawConsole(uint8_t onlyLastLine);
 	void drawKeyboard(uint8_t slX, uint8_t slY, uint8_t onlySelected);
 	void drawTyping(uint8_t);
@@ -66,10 +65,12 @@ private:
   
 public:
 	ESPboyGUI(TFT_eSPI *tftGUI, Adafruit_MCP23017 *mcpGUI, U8g2_for_TFT_eSPI *u8fGUI);
+  void SetKeybParamTyping(String str);
   uint8_t getKeys();
   uint32_t waitKeyUnpressed();
   void printConsole(String bfrstr, uint16_t color, uint8_t ln, uint8_t noAddLine);
   String getUserInput();
+  void toggleDisplayMode(uint8_t mode);
 };
 
 #endif

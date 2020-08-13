@@ -13,6 +13,7 @@ https://hackaday.io/project/164830-espboy-games-iot-stem-for-education-fun
 #include <ESP8266WiFi.h>
 #include "lib/ESPboyLogo.h"
 #include "ESPboyGUI.h"
+#include "ESPboyOTA.h"
 
 #define PN532_IRQ   (15)
 #define PN532_RESET (-1)  
@@ -33,10 +34,11 @@ https://hackaday.io/project/164830-espboy-games-iot-stem-for-education-fun
 #define CSTFTPIN 8  // CS MCP23017 PIN to TFT
 
 Adafruit_MCP23017 mcp;
-U8g2_for_TFT_eSPI u8f;
 TFT_eSPI tft = TFT_eSPI();
+U8g2_for_TFT_eSPI u8f;
 Adafruit_PN532 nfc(PN532_IRQ, PN532_RESET);
 ESPboyGUI* GUIobj = NULL;
+ESPboyOTA* OTAobj = NULL;
 
 uint8_t uid[] = { 0, 0, 0, 0, 0, 0, 0 };
 uint8_t uidLength; 
@@ -135,18 +137,17 @@ void setup() {
 
   delay(1000);
 
-  // clear screen
-  tft.fillScreen(TFT_BLACK);
-
-  GUIobj = new ESPboyGUI(&tft, &mcp, &u8f);
-
 //init rfid/nfc
   nfc.begin();
   uint32_t versiondata = nfc.getFirmwareVersion();
   if (!versiondata) {
-    GUIobj->printConsole(F("RFID module not found"), TFT_RED, 1, 0);
+    tft.setTextColor(TFT_RED, TFT_BLACK);
+    tft.drawString(F("RFID module not found"), 2, 120);
     while(1) delay(1000);
   }
+
+  GUIobj = new ESPboyGUI(&tft, &mcp, &u8f);
+  if (GUIobj->getKeys()) OTAobj = new ESPboyOTA(&tft, &mcp, GUIobj);
 
   String ver = "RFID firmware ";
   ver += (String)((versiondata>>16) & 0xFF); 
@@ -156,6 +157,9 @@ void setup() {
 
   nfc.setPassiveActivationRetries(0xFF);
   nfc.SAMConfig();
+
+  // clear screen
+  tft.fillScreen(TFT_BLACK);
 }
 
 

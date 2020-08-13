@@ -213,7 +213,7 @@ void ESPboyGUI::drawConsole(uint8_t onlyLastLine) {
     //tft->setTextColor(consoleStringsColor[GUI_MAX_CONSOLE_STRINGS], TFT_BLACK);
     //tft->drawString(consoleStrings[GUI_MAX_CONSOLE_STRINGS], 4, GUI_FONT_HEIGHT * (lines - 1) + 3);
     u8f->setForegroundColor(consoleStringsColor[GUI_MAX_CONSOLE_STRINGS]);
-    u8f->drawStr(3, GUI_FONT_HEIGHT * (lines - 1) + 2, consoleStrings[GUI_MAX_CONSOLE_STRINGS].c_str());
+    u8f->drawStr(3, GUI_FONT_HEIGHT * lines, consoleStrings[GUI_MAX_CONSOLE_STRINGS].c_str());
   }
 }
 
@@ -281,4 +281,9 @@ void ESPboyGUI::drawBlinkingCursor() {
     cursorBlinkMillis = millis();
     drawTyping(1);
   }
+}
+
+
+void ESPboyGUI::SetKeybParamTyping(String str){
+  keybParam.typing = str;
 }
