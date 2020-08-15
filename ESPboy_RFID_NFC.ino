@@ -137,6 +137,10 @@ void setup() {
 
   delay(1000);
 
+//OTA init
+  GUIobj = new ESPboyGUI(&tft, &mcp, &u8f);
+  if (GUIobj->getKeys()) OTAobj = new ESPboyOTA(&tft, &mcp, GUIobj);
+
 //init rfid/nfc
   nfc.begin();
   uint32_t versiondata = nfc.getFirmwareVersion();
@@ -145,9 +149,6 @@ void setup() {
     tft.drawString(F("RFID module not found"), 2, 120);
     while(1) delay(1000);
   }
-
-  GUIobj = new ESPboyGUI(&tft, &mcp, &u8f);
-  if (GUIobj->getKeys()) OTAobj = new ESPboyOTA(&tft, &mcp, GUIobj);
 
   String ver = "RFID firmware ";
   ver += (String)((versiondata>>16) & 0xFF); 
