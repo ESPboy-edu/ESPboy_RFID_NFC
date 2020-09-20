@@ -2,6 +2,7 @@
 ESPboyGUI class
 for www.ESPboy.com project by RomanS
 https://hackaday.io/project/164830-espboy-games-iot-stem-for-education-fun
+v2.1
 */
 
 #include "ESPboyGUI.h"
@@ -16,7 +17,7 @@ String *ESPboyGUI::consoleStrings;
 uint16_t *ESPboyGUI::consoleStringsColor;
 
 
-ESPboyGUI::ESPboyGUI(TFT_eSPI* tftGUI, Adafruit_MCP23017* mcpGUI, U8g2_for_TFT_eSPI *u8fGUI) {
+ESPboyGUI::ESPboyGUI(TFT_eSPI *tftGUI, Adafruit_MCP23017 *mcpGUI) {
    consoleStrings = new String[GUI_MAX_CONSOLE_STRINGS+1];
    consoleStringsColor = new uint16_t[GUI_MAX_CONSOLE_STRINGS+1];
    keybParam.renderLine = 0;
@@ -28,7 +29,14 @@ ESPboyGUI::ESPboyGUI(TFT_eSPI* tftGUI, Adafruit_MCP23017* mcpGUI, U8g2_for_TFT_e
    
    tft = tftGUI;
    mcp = mcpGUI;
-   u8f = u8fGUI;
+#ifdef U8g2
+   u8f = new U8g2_for_TFT_eSPI;
+   u8f->begin(*tft); 
+   u8f->setFontMode(1);                 // use u8g2 none transparent mode
+   u8f->setBackgroundColor(TFT_BLACK);
+   u8f->setFontDirection(0);            // left to right
+   u8f->setFont(u8g2_font_4x6_t_cyrillic); 
+#endif
    toggleDisplayMode(1);
 }
 
@@ -38,7 +46,9 @@ uint8_t ESPboyGUI::keysAction() {
   uint8_t keyState = getKeys();
 
   if (keyState) {
+  #ifdef buttonclicks
     tone(SOUNDPIN, 100, 10);
+  #endif
     if (!keybParam.displayMode) {
       if (keyState & GUI_PAD_LEFT && keyState & GUI_PAD_UP) {  // shift
         keybParam.shiftOn = !keybParam.shiftOn;
@@ -162,14 +172,14 @@ void ESPboyGUI::printConsole(String bfrstr, uint16_t color, uint8_t ln, uint8_t 
   if(bfrstr == "") bfrstr = " ";
   
   if (!ln)
-    if (bfrstr.length() > (128-2)/GUI_FONT_WIDTH) {
-      bfrstr = bfrstr.substring(0, (128-2)/GUI_FONT_WIDTH);
+    if (bfrstr.length() > ((128-4)/GUI_FONT_WIDTH)) {
+      bfrstr = bfrstr.substring(0, ((128-4)/GUI_FONT_WIDTH));
       toprint = bfrstr;
-    }
+  }
 
-  for (uint8_t i = 0; i <= ((bfrstr.length()-1) / ((128-2)/GUI_FONT_WIDTH)); i++) {
-    toprint = bfrstr.substring(i * (128-2)/GUI_FONT_WIDTH);
-    toprint = toprint.substring(0, (128-2)/GUI_FONT_WIDTH);
+  for (uint8_t i = 0; i <= ((bfrstr.length()-1) / ((128-4)/GUI_FONT_WIDTH)); i++) {
+    toprint = bfrstr.substring(i * (128-4)/GUI_FONT_WIDTH);
+    toprint = toprint.substring(0, (128-4)/GUI_FONT_WIDTH);
 
     if (!noAddLine) {
       for (uint8_t j = 0; j < GUI_MAX_CONSOLE_STRINGS; j++) {
@@ -195,25 +205,38 @@ void ESPboyGUI::drawConsole(uint8_t onlyLastLine) {
   else
     lines = GUI_MAX_STRINGS_ONSCREEN_SMALL;
 
+#ifdef U8g2
   if (!onlyLastLine)
     tft->fillRect(1, 1, 126, lines * GUI_FONT_HEIGHT, TFT_BLACK);
   else
-    tft->fillRect(1, lines * GUI_FONT_HEIGHT - GUI_FONT_HEIGHT, 126, GUI_FONT_HEIGHT, TFT_BLACK);
+    tft->fillRect(1, (lines-1) * GUI_FONT_HEIGHT, 126, GUI_FONT_HEIGHT, TFT_BLACK);
+#else
+  if (!onlyLastLine)
+    tft->fillRect(1, 1, 126, lines * GUI_FONT_HEIGHT+4, TFT_BLACK);
+  else
+    tft->fillRect(1, (lines-1) * GUI_FONT_HEIGHT+4, 126, GUI_FONT_HEIGHT, TFT_BLACK);
+#endif
 
   offsetY = GUI_FONT_HEIGHT;
   if (!onlyLastLine) {
     for (uint8_t i = GUI_MAX_CONSOLE_STRINGS - lines - keybParam.renderLine + 1; i < GUI_MAX_CONSOLE_STRINGS - keybParam.renderLine + 1; i++) {
-      //tft->setTextColor(consoleStringsColor[i], TFT_BLACK);
-      //tft->drawString(consoleStrings[i], 4, offsetY);
+#ifndef U8g2
+      tft->setTextColor(consoleStringsColor[i], TFT_BLACK);
+      tft->drawString(consoleStrings[i], 4, offsetY - 4);
+#else
       u8f->setForegroundColor(consoleStringsColor[i]);
       u8f->drawStr(3, offsetY, consoleStrings[i].c_str());
+#endif
       offsetY += GUI_FONT_HEIGHT;
     }
   } else {
-    //tft->setTextColor(consoleStringsColor[GUI_MAX_CONSOLE_STRINGS], TFT_BLACK);
-    //tft->drawString(consoleStrings[GUI_MAX_CONSOLE_STRINGS], 4, GUI_FONT_HEIGHT * (lines - 1) + 3);
+#ifndef U8g2
+    tft->setTextColor(consoleStringsColor[GUI_MAX_CONSOLE_STRINGS], TFT_BLACK);
+    tft->drawString(consoleStrings[GUI_MAX_CONSOLE_STRINGS], 4, GUI_FONT_HEIGHT * lines - 4);
+#else
     u8f->setForegroundColor(consoleStringsColor[GUI_MAX_CONSOLE_STRINGS]);
     u8f->drawStr(3, GUI_FONT_HEIGHT * lines, consoleStrings[GUI_MAX_CONSOLE_STRINGS].c_str());
+#endif
   }
 }
 

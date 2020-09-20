@@ -2,20 +2,37 @@
 ESPboyGUI class
 for www.ESPboy.com project by RomanS
 https://hackaday.io/project/164830-espboy-games-iot-stem-for-education-fun
+v2.1
 */
+
+
+
+//!!!!!!!!!!!!!!!!!
+#define U8g2  //if defined then using font 4x6, if commented using font 6x8
+#define buttonclicks //if defined - button are clicking but it takes more than 1kb RAM, if commented - no clicks and more free RAM
+//!!!!!!!!!!!!!!!!!
+
+
 
 #ifndef ESPboy_GUI
 #define ESPboy_GUI
 
 #include <Adafruit_MCP23017.h>
 #include <TFT_eSPI.h>
-#include "U8g2_for_TFT_eSPI.h"
 #include <FS.h> 
 using fs::FS;
 
+#ifdef U8g2
+ #include "U8g2_for_TFT_eSPI.h"
+#endif
 
-#define GUI_FONT_WIDTH 4
-#define GUI_FONT_HEIGHT 6
+#ifdef U8g2
+ #define GUI_FONT_WIDTH 4
+ #define GUI_FONT_HEIGHT 6
+#else
+ #define GUI_FONT_WIDTH 6
+ #define GUI_FONT_HEIGHT 8
+#endif
 
 #define GUI_MAX_CONSOLE_STRINGS 200
 #define GUI_MAX_STRINGS_ONSCREEN_FULL  ((128-2)/GUI_FONT_HEIGHT)
@@ -42,8 +59,10 @@ class ESPboyGUI{
 private:
   Adafruit_MCP23017 *mcp; 
   TFT_eSPI *tft;
+#ifdef U8g2
   U8g2_for_TFT_eSPI *u8f;
-  
+#endif
+
   struct keyboardParameters{
     uint8_t renderLine;
     uint8_t displayMode;
@@ -64,7 +83,7 @@ private:
 	void drawBlinkingCursor();
   
 public:
-	ESPboyGUI(TFT_eSPI *tftGUI, Adafruit_MCP23017 *mcpGUI, U8g2_for_TFT_eSPI *u8fGUI);
+  ESPboyGUI(TFT_eSPI *tftGUI, Adafruit_MCP23017 *mcpGUI);
   void SetKeybParamTyping(String str);
   uint8_t getKeys();
   uint32_t waitKeyUnpressed();

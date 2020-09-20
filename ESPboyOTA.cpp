@@ -4,9 +4,10 @@ for www.ESPboy.com project
 https://hackaday.io/project/164830-espboy-games-iot-stem-for-education-fun
 thanks to DmitryL (Plague) for coding help,
 Corax, AlRado, Torabora, MLXXXP for tests and advices.
+v2.1
 */
 
-#define OTAv 15
+#define OTAv 16
 
 #include "ESPboyOTA.h"
 #define SOUNDPIN D3
@@ -17,9 +18,7 @@ const char PROGMEM* ESPboyOTA::hostD = "script.google.com";
 const char PROGMEM* ESPboyOTA::urlPost = "/macros/s/AKfycbxIfj1Eqi1eupe9Vmkhk0liuNrhSvM1Sx65qxocbBsd4jl0e7yj/exec";
 const uint16_t PROGMEM ESPboyOTA::httpsPort = 443;
 
-ESPboyOTA::ESPboyOTA(TFT_eSPI* tftOTA, Adafruit_MCP23017* mcpOTA, ESPboyGUI* GUIobjOTA) {   
-   tft = tftOTA;
-   mcp = mcpOTA;
+ESPboyOTA::ESPboyOTA(ESPboyGUI* GUIobjOTA) {    
    GUIobj = GUIobjOTA;
    GUIobj->toggleDisplayMode(1);
    checkOTA();
@@ -181,7 +180,7 @@ void ESPboyOTA::updateOTA(String otaLink) {
 
 String ESPboyOTA::fillPayload(String downloadID, String downloadName) {
   String payload = "{\"values\": \"";
-  payload += F("0");   // session
+  payload += WiFi.macAddress();   // MAC address
   payload += F(", ");  // date/time
   payload +=F(", "); 
   payload += WiFi.localIP().toString();

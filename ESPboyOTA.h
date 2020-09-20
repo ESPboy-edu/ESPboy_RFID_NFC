@@ -4,13 +4,14 @@ for www.ESPboy.com project
 https://hackaday.io/project/164830-espboy-games-iot-stem-for-education-fun
 thanks to DmitryL (Plague) for coding help,
 Corax, AlRado, Torabora, MLXXXP for tests and advices.
+v2.1
 */
+
+
 
 #ifndef ESPboy_OTA
 #define ESPboy_OTA
 
-#include <Adafruit_MCP23017.h>
-#include <TFT_eSPI.h>
 #include <FS.h> 
 using fs::FS;
 #include <HTTPSRedirect.h>
@@ -54,8 +55,6 @@ struct lessRssi{
 class ESPboyOTA{
 
 private:
-  Adafruit_MCP23017 *mcp; 
-  TFT_eSPI *tft;
   ESPboyGUI *GUIobj = NULL;
 
   std::vector<wf> wfList;  // WiFi list
@@ -88,7 +87,7 @@ private:
 	void checkOTA();
 
 public:
-	ESPboyOTA(TFT_eSPI *tftOTA, Adafruit_MCP23017 *mcpOTA, ESPboyGUI* GUIobjOTA);
+	ESPboyOTA(ESPboyGUI* GUIobjOTA);
 };
 
 #endif
