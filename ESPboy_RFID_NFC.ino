@@ -8,7 +8,6 @@ https://hackaday.io/project/164830-espboy-games-iot-stem-for-education-fun
 
 #include <Adafruit_MCP23017.h>
 #include <TFT_eSPI.h>
-#include "U8g2_for_TFT_eSPI.h"
 #include <Adafruit_PN532.h>
 #include <ESP8266WiFi.h>
 #include "lib/ESPboyLogo.h"
@@ -41,6 +40,45 @@ uint8_t ndefprefix = NDEF_URIPREFIX_HTTP_WWWDOT;
 static const uint8_t KEY_DEFAULT_KEYAB[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 
+const char* PROGMEM printInit = "RFID/NFC";
+const char* PROGMEM printMifare = "Mifare Classic";
+const char* PROGMEM printReadedStored = "Readed and stored";
+const char* PROGMEM printFormatedNdef = "Formatted for NDEF using MAD1";
+
+const char* PROGMEM printWritingBlock = "Writing block";
+const char* PROGMEM printWriteReaded = "Write readed RFID";
+const char* PROGMEM printUltralight = "Mifare Ultralight or Plus";
+const char* PROGMEM printWhatBlockNo = "What block No? DEC";
+const char* PROGMEM printStartBlockNo = "Start block No? DEC";
+const char* PROGMEM printEndBlockNo = "End block No? DEC";
+
+const char* PROGMEM printWaitingToWrite = "Waiting for RFID to write";
+const char* PROGMEM printWaitingToRead = "Waiting for RFID to read";
+const char* PROGMEM printWaitingToFormat = "Waiting for RFID to format";
+const char* PROGMEM printMifareClassic = "Mifare Classic to write";
+const char* PROGMEM printDetectedWriting = "Card detected. Writing...";
+const char* PROGMEM printShowStored = "Show stored card";
+
+const char* PROGMEM printOk = "OK";
+const char* PROGMEM printFail = "FAIL";
+const char* PROGMEM printFormat = "Format";
+const char* PROGMEM printRead = "Read";
+const char* PROGMEM printWrite = "Write";
+const char* PROGMEM printBreak = "Break";
+
+const char* PROGMEM printNotFound = "RFID module not found";
+const char* PROGMEM printRfidInitError = "RFID init error";
+const char* PROGMEM printCardError = "RFID error";
+const char* PROGMEM printAuthFail = "Authentication fail";
+const char* PROGMEM printReadingError = "Reading error";
+const char* PROGMEM printNotIsoRfid = "Not ISO14443A RFID";
+const char* PROGMEM printFormatingError = "Formatting error";
+const char* PROGMEM printWrongParameter = "Wrong parameter";
+const char* PROGMEM printWrongCom ="Wrong command";
+
+
+ 
+
 
 #define PAD_LEFT        0x01
 #define PAD_UP          0x02
@@ -59,7 +97,6 @@ static const uint8_t KEY_DEFAULT_KEYAB[6] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
 
 Adafruit_MCP23017 mcp;
 TFT_eSPI tft;
-U8g2_for_TFT_eSPI u8f;
 Adafruit_PN532 nfc(PN532_IRQ, PN532_RESET);
 ESPboyGUI* GUIobj = NULL;
 ESPboyOTA* OTAobj = NULL;
@@ -147,30 +184,24 @@ void setup() {
   tft.setRotation(0);
   tft.fillScreen(TFT_BLACK);
   
-  //u8f init
-  u8f.begin(tft);
-  u8f.setFontMode(1);                 // use u8g2 none transparent mode
-  u8f.setBackgroundColor(TFT_BLACK);
-  u8f.setFontDirection(0);            // left to right
-  u8f.setFont(u8g2_font_4x6_t_cyrillic); 
 
   // draw ESPboylogo
   tft.drawXBitmap(30, 20, ESPboyLogo, 68, 64, TFT_YELLOW);
   tft.setTextColor(TFT_YELLOW, TFT_BLACK);
-  tft.drawString(F("RFID/NFC"), 42, 95);
+  tft.drawString(printInit, 42, 95);
 
   delay(1000);
 
 //OTA init
-  GUIobj = new ESPboyGUI(&tft, &mcp, &u8f);
-  if (GUIobj->getKeys()) OTAobj = new ESPboyOTA(&tft, &mcp, GUIobj);
+  GUIobj = new ESPboyGUI(&tft, &mcp);
+  if (GUIobj->getKeys()) OTAobj = new ESPboyOTA(GUIobj);
 
 //init rfid/nfc
   nfc.begin();
   uint32_t versiondata = nfc.getFirmwareVersion();
   if (!versiondata) {
     tft.setTextColor(TFT_RED, TFT_BLACK);
-    tft.drawString(F("RFID module not found"), 2, 118);
+    tft.drawString(printNotFound, 2, 118);
     while(1) delay(1000);
   }
 
@@ -203,7 +234,7 @@ void readDataCard4(){
   cardid |= uid[3];
 
 
-  GUIobj->printConsole(F("Mifare Classic"), TFT_GREEN, 1, 0);
+  GUIobj->printConsole(printMifare, TFT_GREEN, 1, 0);
   String toPrint = "ID " + (String)cardid;
   GUIobj->printConsole(toPrint, TFT_YELLOW, 1, 0);
 
@@ -211,7 +242,7 @@ void readDataCard4(){
 
  for (currentblock = 0; currentblock < 64; currentblock++){ 
    if (!nfc.mifareclassic_AuthenticateBlock (uid, uidLength, currentblock, 1, keya)){
-     GUIobj->printConsole(F("Authentication fail"), TFT_RED, 1, 0);
+     GUIobj->printConsole(printAuthFail, TFT_RED, 1, 0);
      return;
    }
    else{ 
@@ -224,7 +255,7 @@ void readDataCard4(){
      toPrint += "  ";
      GUIobj->printConsole(toPrint, TFT_YELLOW, 1, 0);
      if (!nfc.mifareclassic_ReadDataBlock(currentblock, &data[currentblock][0])){
-       GUIobj->printConsole(F("Reading error"), TFT_RED, 1, 0);
+       GUIobj->printConsole(printReadingError, TFT_RED, 1, 0);
        return;
      }
      else{
@@ -255,13 +286,13 @@ void readDataCard4(){
      }          
    }
  }
- GUIobj->printConsole(F("Readed and stored"), TFT_GREEN, 1, 0);
+ GUIobj->printConsole(printReadedStored, TFT_GREEN, 1, 0);
 }  
 
 
 void readDataCard7(){
   memset(&data,0,sizeof(data));       
-  GUIobj->printConsole(F("Mifare Ultralight or Plus"), TFT_GREEN, 1, 0);
+  GUIobj->printConsole(printUltralight, TFT_GREEN, 1, 0);
  
   for (uint8_t currentpage = 0; currentpage < 39; currentpage++){ 
      String toPrint = "P";
@@ -269,7 +300,7 @@ void readDataCard7(){
      toPrint += (String)(currentpage);
      GUIobj->printConsole(toPrint, TFT_YELLOW, 1, 0);
      if (!nfc.mifareultralight_ReadPage (currentpage, &data[currentpage][0])){
-       GUIobj->printConsole(F("Reading error"), TFT_RED, 1, 0);
+       GUIobj->printConsole(printReadingError, TFT_RED, 1, 0);
        return;
      }
      else{
@@ -301,9 +332,9 @@ void writeBlock(){
   uint8_t dta[16];
   uint8_t dataNo;
   
-  GUIobj->printConsole(F("Writing block"), TFT_YELLOW, 1, 0);
+  GUIobj->printConsole(printWritingBlock, TFT_YELLOW, 1, 0);
   
-  GUIobj->printConsole(F("What block No? DEC"), TFT_MAGENTA, 1, 0);
+  GUIobj->printConsole(printWhatBlockNo, TFT_MAGENTA, 1, 0);
   while (!blockToWrite) blockToWrite = GUIobj->getUserInput().toInt();
   GUIobj->printConsole((String)blockToWrite, TFT_YELLOW, 1, 0);
   
@@ -315,7 +346,8 @@ void writeBlock(){
     dta[i] = dataNo;
     GUIobj->printConsole((String)(dta[i]), TFT_YELLOW, 1, 0);
   }
-  String toPrint = F("Writing block: 0x");
+  String toPrint = printWritingBlock;
+  toPrint += ": 0x";
   if(blockToWrite<16) toPrint+="0";
   GUIobj->printConsole(toPrint + (String (blockToWrite, HEX)), TFT_WHITE, 1, 0);
   GUIobj->printConsole("Data 0x:", TFT_WHITE, 1, 0);
@@ -334,48 +366,48 @@ void writeBlock(){
   }
   GUIobj->printConsole(capitaliseString(toPrint), TFT_WHITE, 0, 0);
   
-  GUIobj->printConsole(F("Waiting for ISO14443A to write..."), TFT_MAGENTA, 0, 0);
+  GUIobj->printConsole(printWaitingToWrite, TFT_MAGENTA, 0, 0);
   
   if (!nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)){
-    GUIobj->printConsole(F("Card error"), TFT_RED, 1, 0);
+    GUIobj->printConsole(printCardError, TFT_RED, 1, 0);
     return;}
  
   if (!nfc.mifareclassic_AuthenticateBlock (uid, uidLength, blockToWrite, 1, keya)){
-    GUIobj->printConsole(F("Autentification fail"), TFT_RED, 1, 0);
+    GUIobj->printConsole(printAuthFail, TFT_RED, 1, 0);
     return;}
     
-  GUIobj->printConsole(F("Card detected. Writing..."), TFT_MAGENTA, 1, 0); 
+  GUIobj->printConsole(printWrite, TFT_MAGENTA, 1, 0); 
   
   if(nfc.mifareclassic_WriteDataBlock (blockToWrite, dta)) 
-     GUIobj->printConsole(F("OK"), TFT_GREEN, 1, 0);
+     GUIobj->printConsole(printOk, TFT_GREEN, 1, 0);
   else 
-     GUIobj->printConsole(F("FAULT"), TFT_RED, 1, 0);
+     GUIobj->printConsole(printFail, TFT_RED, 1, 0);
 }
     
 
 
 void formatCard(){
-  GUIobj->printConsole(F("Format"), TFT_YELLOW, 1, 0);
-  GUIobj->printConsole(F("Waiting for RFID ISO14443A..."), TFT_MAGENTA, 1, 0);
+  GUIobj->printConsole(printFormat, TFT_YELLOW, 1, 0);
+  GUIobj->printConsole(printWaitingToFormat, TFT_MAGENTA, 1, 0);
   if (!nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)){
-    GUIobj->printConsole(F("ISO14443A RFID init error"), TFT_RED, 1, 0);
+    GUIobj->printConsole(printRfidInitError, TFT_RED, 1, 0);
     return;}
   if (uidLength != 4){
-    GUIobj->printConsole(F("Not ISO14443A RFID"), TFT_RED, 1, 0);
+    GUIobj->printConsole(printNotIsoRfid, TFT_RED, 1, 0);
     return;}
   if (!nfc.mifareclassic_AuthenticateBlock (uid, uidLength, 0, 0, keya)){
-    GUIobj->printConsole(F("Unable to authenticate block 0"), TFT_RED, 1, 0);
+    GUIobj->printConsole(printAuthFail, TFT_RED, 1, 0);
     return;}
   if(!nfc.mifareclassic_FormatNDEF())
-    {GUIobj->printConsole(F("Formatting error"), TFT_RED, 1, 0);
+    {GUIobj->printConsole(printFormatingError, TFT_RED, 1, 0);
     return;}
-  GUIobj->printConsole(F("Formatted for NDEF using MAD1"), TFT_GREEN, 1, 0);
+  GUIobj->printConsole(printFormatedNdef, TFT_GREEN, 1, 0);
 }
 
 
 void readCard(){    
-  GUIobj->printConsole(F("Read"), TFT_YELLOW, 1, 0);
-  GUIobj->printConsole(F("Waiting for RFID ISO14443A..."), TFT_MAGENTA, 1, 0);
+  GUIobj->printConsole(printRead, TFT_YELLOW, 1, 0);
+  GUIobj->printConsole(printWaitingToRead, TFT_MAGENTA, 1, 0);
   if (nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)){
     String toPrint = "Len " + (String)uidLength;
     GUIobj->printConsole(toPrint, TFT_YELLOW, 1, 0);
@@ -390,7 +422,7 @@ void readCard(){
     if (uidLength == 7) readDataCard7();
   }
   else 
-    GUIobj->printConsole(F("Reading error"), TFT_RED, 1, 0);
+    GUIobj->printConsole(printReadingError, TFT_RED, 1, 0);
 }
 
 
@@ -398,31 +430,31 @@ void readCard(){
 void writeMemory(){
  uint16_t writeFrom=0, writeTo=0;
   
- GUIobj->printConsole(F("Write readed card"), TFT_YELLOW, 1, 0); 
+ GUIobj->printConsole(printWriteReaded, TFT_YELLOW, 1, 0); 
 
- GUIobj->printConsole(F("Start block No? DEC"), TFT_MAGENTA, 1, 0);
+ GUIobj->printConsole(printStartBlockNo, TFT_MAGENTA, 1, 0);
  while (!writeFrom) writeFrom = GUIobj->getUserInput().toInt();
  GUIobj->printConsole((String)writeFrom, TFT_YELLOW, 1, 0);
 
- GUIobj->printConsole(F("End block No? DEC"), TFT_MAGENTA, 1, 0);
+ GUIobj->printConsole(printEndBlockNo, TFT_MAGENTA, 1, 0);
  while (!writeTo) writeTo = GUIobj->getUserInput().toInt();
  GUIobj->printConsole((String)writeTo, TFT_YELLOW, 1, 0);
 
  if (writeTo < writeFrom || writeTo>64){
-   GUIobj->printConsole(F("Wrong parameter"), TFT_RED, 1, 0);
+   GUIobj->printConsole(printWrongParameter, TFT_RED, 1, 0);
    return;
  }
  
- GUIobj->printConsole(F("Mifare Classec to write..."), TFT_MAGENTA, 0, 0);
+ GUIobj->printConsole(printMifareClassic, TFT_MAGENTA, 0, 0);
  if (!nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)){
-   GUIobj->printConsole(F("Card error"), TFT_RED, 1, 0);
+   GUIobj->printConsole(printCardError, TFT_RED, 1, 0);
    return;}
  
- GUIobj->printConsole(F("Card detected. Writing..."), TFT_MAGENTA, 1, 0); 
+ GUIobj->printConsole(printDetectedWriting, TFT_MAGENTA, 1, 0); 
   
    for (uint8_t currentblock = writeFrom; currentblock < writeTo; currentblock++){ 
      if (!nfc.mifareclassic_AuthenticateBlock (uid, uidLength, currentblock, 1, keya)){
-       GUIobj->printConsole(F("Authentification fail"), TFT_RED, 1, 0);
+       GUIobj->printConsole(printAuthFail, TFT_RED, 1, 0);
        return;}
      String toPrint = "S";
      if(currentblock/4 < 10) toPrint += "0";
@@ -452,21 +484,21 @@ void writeMemory(){
      GUIobj->printConsole(capitaliseString(toPrint), TFT_WHITE, 0, 0);
              
      if(nfc.mifareclassic_WriteDataBlock (currentblock, &data[currentblock][0])) 
-        GUIobj->printConsole(F("OK"), TFT_GREEN, 1, 0);
+        GUIobj->printConsole(printOk, TFT_GREEN, 1, 0);
      else {
-        GUIobj->printConsole(F("FAULT"), TFT_RED, 1, 0);
+        GUIobj->printConsole(printFail, TFT_RED, 1, 0);
         return;}
   }
 }
 
 
 void showMemory(){ 
-  GUIobj->printConsole(F("Show stored card"), TFT_YELLOW, 0, 0);
+  GUIobj->printConsole(printShowStored, TFT_YELLOW, 0, 0);
   delay(1000);
   for (uint8_t currentblock = 0; currentblock < 64; currentblock++){
        delay(1);
        if(GUIobj->getKeys()){
-          GUIobj->printConsole(F("Break"), TFT_RED, 0, 0);
+          GUIobj->printConsole(printBreak, TFT_RED, 0, 0);
           return;}
        String toPrint = "S";
        if(currentblock/4 < 10) toPrint += "0";
@@ -795,7 +827,7 @@ void loop() {
       ntgWrite();
       break;
     default:
-      GUIobj->printConsole(F("Wrong command"), TFT_RED, 1, 0);
+      GUIobj->printConsole(printWrongCom, TFT_RED, 1, 0);
       break;
   }
 }
