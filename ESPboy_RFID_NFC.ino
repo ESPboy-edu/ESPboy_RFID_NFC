@@ -55,9 +55,14 @@ const char* PROGMEM printEndBlockNo = "End block No? DEC";
 const char* PROGMEM printWaitingToWrite = "Waiting for RFID to write";
 const char* PROGMEM printWaitingToRead = "Waiting for RFID to read";
 const char* PROGMEM printWaitingToFormat = "Waiting for RFID to format";
+const char* PROGMEM printMifareToFormat = "Mifare Classic to format...";
 const char* PROGMEM printMifareClassic = "Mifare Classic to write";
 const char* PROGMEM printDetectedWriting = "Card detected. Writing...";
 const char* PROGMEM printShowStored = "Show stored card";
+const char* PROGMEM printFormatingProgress = "Formating in progress...";
+const char* PROGMEM printFormatingSucsesseful = "Formating sucsesseful";
+const char* PROGMEM printNtagToErase = "Waiting NTAG to erase";
+const char* PROGMEM printWaitingNtagToWrite = "Waiting NTAG to write";
 
 const char* PROGMEM printOk = "OK";
 const char* PROGMEM printFail = "FAIL";
@@ -72,12 +77,33 @@ const char* PROGMEM printCardError = "RFID error";
 const char* PROGMEM printAuthFail = "Authentication fail";
 const char* PROGMEM printReadingError = "Reading error";
 const char* PROGMEM printNotIsoRfid = "Not ISO14443A RFID";
+const char* PROGMEM printNotMifareClassic = "Not Mifare Classic";
 const char* PROGMEM printFormatingError = "Formatting error";
 const char* PROGMEM printWrongParameter = "Wrong parameter";
 const char* PROGMEM printWrongCom ="Wrong command";
+const char* PROGMEM printEnterUrl = "Enter URL to write";
+const char* PROGMEM printErasingOld = "Erasing old...";
+const char* PROGMEM printNtagStructureError = "NTAG structure error";
+const char* PROGMEM printWrittingNtag = "Writting NTAG...";
+const char* PROGMEM printErasingNtag = "Erasing NTAG...";
+const char* PROGMEM printEraseError = "Erase error";
+const char* PROGMEM printMifareToNtag = "Mifare Clas format to NTAG";
+const char* PROGMEM printFormatingToNtag = "Formating to NTAG...";
 
+const char* PROGMEM printWriteSectorError = "Write sector error";
+const char* PROGMEM printWriteTrailerError = "Write trailer block error";
+const char* PROGMEM printNtagToRead = "Waiting NTAG to read";
+const char* PROGMEM printNotNtag = "Not NTAG203/NTAG213";
+const char* PROGMEM printWrittingOk = "Writting OK";
+const char* PROGMEM printWrittingError = "Writting Error";
+const char* PROGMEM printWritting = "Writting...";
+const char* PROGMEM printNtagDetected = "NTAG detected, bytes ";
 
- 
+const char* PROGMEM printMenuLine1 = "Mifare: R-read W-write";
+const char* PROGMEM printMenuLine2 = "B-writeblock O-show F-format";
+const char* PROGMEM printMenuLine3 = "NTAG: E-read I-write";
+const char* PROGMEM printMenuLine4 = "H-show A-erase M-format";
+const char* PROGMEM printMenuCommand = "Command?";
 
 
 #define PAD_LEFT        0x01
@@ -537,44 +563,44 @@ void formatMifare(){
   uint8_t blankAccessBits[3] = { 0xff, 0x07, 0x80 };
   uint8_t numOfSector = 16;  
 
-  GUIobj->printConsole(F("Mifare Classic to format..."), TFT_YELLOW, 0, 0);
+  GUIobj->printConsole(printMifareToFormat, TFT_YELLOW, 0, 0);
   if (!nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)){
-    GUIobj->printConsole(F("Card reading ERROR"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printReadingError, TFT_RED, 0, 0);
     return;}
   if (uidLength != 4){
-    GUIobj->printConsole(F("Not Mifare Classic"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printNotMifareClassic, TFT_RED, 0, 0);
     return;}
-  GUIobj->printConsole(F("Formating in progress..."), TFT_MAGENTA, 0, 0);
+  GUIobj->printConsole(printFormatingProgress, TFT_MAGENTA, 0, 0);
     
     for (uint8_t idx = 0; idx < numOfSector; idx++){
       if (!nfc.mifareclassic_AuthenticateBlock (uid, uidLength, BLOCK_NUMBER_OF_SECTOR_TRAILER(idx), 1, (uint8_t *)KEY_DEFAULT_KEYAB)){
-        GUIobj->printConsole(F("Authentification fail"), TFT_RED, 0, 0);
+        GUIobj->printConsole(printAuthFail, TFT_RED, 0, 0);
         return;}
       
       if (idx == 16){
         memset(blockBuffer, 0, sizeof(blockBuffer));
         if (!(nfc.mifareclassic_WriteDataBlock((BLOCK_NUMBER_OF_SECTOR_TRAILER(idx)) - 3, blockBuffer))){
-            GUIobj->printConsole(F("Write sector error"), TFT_RED, 0, 0);
+            GUIobj->printConsole(printWriteSectorError, TFT_RED, 0, 0);
             return;}
         }
         if ((idx == 0) || (idx == 16)){
           memset(blockBuffer, 0, sizeof(blockBuffer));
           if (!(nfc.mifareclassic_WriteDataBlock((BLOCK_NUMBER_OF_SECTOR_TRAILER(idx)) - 2, blockBuffer))){
-            GUIobj->printConsole(F("Write sector error"), TFT_RED, 0, 0);
+            GUIobj->printConsole(printWriteSectorError, TFT_RED, 0, 0);
             return;}}
         else{
           memset(blockBuffer, 0, sizeof(blockBuffer));
           if (!(nfc.mifareclassic_WriteDataBlock((BLOCK_NUMBER_OF_SECTOR_TRAILER(idx)) - 3, blockBuffer))){
-            GUIobj->printConsole(F("Write sector error"), TFT_RED, 0, 0);
+            GUIobj->printConsole(printWriteSectorError, TFT_RED, 0, 0);
             return;}
     
           if (!(nfc.mifareclassic_WriteDataBlock((BLOCK_NUMBER_OF_SECTOR_TRAILER(idx)) - 2, blockBuffer))){
-            GUIobj->printConsole(F("Write sector error"), TFT_RED, 0, 0);
+            GUIobj->printConsole(printWriteSectorError, TFT_RED, 0, 0);
             return;}
         }
       memset(blockBuffer, 0, sizeof(blockBuffer));
       if (!(nfc.mifareclassic_WriteDataBlock((BLOCK_NUMBER_OF_SECTOR_TRAILER(idx)) - 1, blockBuffer))){
-        GUIobj->printConsole(F("Write sector error"), TFT_RED, 0, 0);
+        GUIobj->printConsole(printWriteSectorError, TFT_RED, 0, 0);
         return;}
       
       memcpy(blockBuffer, KEY_DEFAULT_KEYAB, sizeof(KEY_DEFAULT_KEYAB));
@@ -583,28 +609,28 @@ void formatMifare(){
       memcpy(blockBuffer + 10, KEY_DEFAULT_KEYAB, sizeof(KEY_DEFAULT_KEYAB));
 
       if (!(nfc.mifareclassic_WriteDataBlock((BLOCK_NUMBER_OF_SECTOR_TRAILER(idx)), blockBuffer))){
-        GUIobj->printConsole(F("Write trailer block error"), TFT_RED, 0, 0);
+        GUIobj->printConsole(printWriteTrailerError, TFT_RED, 0, 0);
         return;}
   }
   
-  GUIobj->printConsole(F("Formating sucsesseful"), TFT_GREEN, 0, 0);
+  GUIobj->printConsole(printFormatingSucsesseful, TFT_GREEN, 0, 0);
 }
 
 
 void ntgRead(){
-  GUIobj->printConsole(F("Waiting NTAG to read"), TFT_YELLOW, 0, 0);
+  GUIobj->printConsole(printNtagToRead, TFT_YELLOW, 0, 0);
   
   if (!nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)){
-    GUIobj->printConsole(F("Card reading ERROR"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printReadingError, TFT_RED, 0, 0);
     return;}
   
   if (uidLength!=7){
-    GUIobj->printConsole(F("Not NTAG203/NTAG213"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printNotNtag, TFT_RED, 0, 0);
     return;}
     
     for (uint8_t i = 0; i < 42; i++) {
       if (!nfc.ntag2xx_ReadPage(i, &ntgdata[i][0])){
-        GUIobj->printConsole(F("NTAG reading error"), TFT_RED, 0, 0);
+        GUIobj->printConsole(printReadingError, TFT_RED, 0, 0);
         return;}
           
        String toPrint="Page ";
@@ -633,58 +659,57 @@ void ntgRead(){
 
 void ntgErase(){
   uint8_t erasedta[4]={0,0,0,0};
-  GUIobj->printConsole(F("Waiting NTAG to erase"), TFT_YELLOW, 0, 0);
+  GUIobj->printConsole(printNtagToErase, TFT_YELLOW, 0, 0);
   
   if (!nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)){
-    GUIobj->printConsole(F("Card reading ERROR"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printReadingError, TFT_RED, 0, 0);
     return;}
   
   if (uidLength!=7){
-    GUIobj->printConsole(F("Not NTAG203/NTAG213"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printNotNtag, TFT_RED, 0, 0);
     return;}
 
-  GUIobj->printConsole(F("Erasing NTAG..."), TFT_MAGENTA, 0, 0);
+  GUIobj->printConsole(printErasingNtag, TFT_MAGENTA, 0, 0);
   
   for (uint8_t i = 4; i < 39; i++) {
     if(!nfc.ntag2xx_WritePage(i, erasedta)){
-      GUIobj->printConsole(F("Erase error"), TFT_RED, 0, 0);
+      GUIobj->printConsole(printEraseError, TFT_RED, 0, 0);
       return;}
 
     String toPrint="Page ";
     if (i < 10) toPrint+="0";
     toPrint += (String)i; 
-    toPrint += " erase OK";
+    toPrint += F(" erase OK");
     GUIobj->printConsole(toPrint, TFT_GREEN, 0, 0);
   }
 }
 
 
 void ntgFormat(){
-  GUIobj->printConsole(F("Mifare Clas format to NTAG"), TFT_YELLOW, 0, 0);
+  GUIobj->printConsole(printMifareToNtag, TFT_YELLOW, 0, 0);
   
   if (!nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)){
-    GUIobj->printConsole(F("Card reading ERROR"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printReadingError, TFT_RED, 0, 0);
     return;}
   
   if (uidLength!=4){
-    GUIobj->printConsole(F("Not Mifare Classic"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printNotMifareClassic, TFT_RED, 0, 0);
     return;}
-
-  GUIobj->printConsole(F("Formating to NTAG..."), TFT_MAGENTA, 0, 0);
-
+  GUIobj->printConsole(printFormatingToNtag, TFT_MAGENTA, 0, 0);
+  
     if (!nfc.mifareclassic_AuthenticateBlock (uid, uidLength, 0, 0, keya)){
-      GUIobj->printConsole(F("Authentification fail"), TFT_RED, 1, 0);
+      GUIobj->printConsole(printAuthFail, TFT_RED, 1, 0);
       return;}
 
     if (!nfc.mifareclassic_FormatNDEF()){
-      GUIobj->printConsole(F("Formating to NTAG fail"), TFT_RED, 1, 0);
+      GUIobj->printConsole(printFail, TFT_RED, 1, 0);
       return;}
 
-    GUIobj->printConsole(F("Formating to NTAG OK"), TFT_GREEN, 0, 0);
-    GUIobj->printConsole(F("Writing TAG..."), TFT_MAGENTA, 0, 0);
+    GUIobj->printConsole(printOk, TFT_GREEN, 0, 0);
+    GUIobj->printConsole(printWrittingNtag, TFT_MAGENTA, 0, 0);
 
     if (!nfc.mifareclassic_AuthenticateBlock (uid, uidLength, 4, 0, keya)){
-      GUIobj->printConsole(F("Authentification fail"), TFT_RED, 1, 0);
+      GUIobj->printConsole(printAuthFail, TFT_RED, 1, 0);
       return;
     }
 
@@ -692,19 +717,19 @@ void ntgFormat(){
     if (url.length() > 38) url = url.substring(0,38);
     
     if (nfc.mifareclassic_WriteNDEFURI(1, ndefprefix, url.c_str()))
-      GUIobj->printConsole(F("Writting OK"), TFT_GREEN, 1, 0);
+      GUIobj->printConsole(printOk, TFT_GREEN, 1, 0);
     else
-      GUIobj->printConsole(F("Writting FAIL"), TFT_RED, 1, 0);
+      GUIobj->printConsole(printFail, TFT_RED, 1, 0);
 }
 
 
 void ntgShow(){
-  GUIobj->printConsole(F("NTG stired"), TFT_YELLOW, 0, 0);
+  GUIobj->printConsole(printOk, TFT_YELLOW, 0, 0);
   delay(1000);
     
     for (uint8_t i = 0; i < 42; i++) {
           
-       String toPrint="Page ";
+       String toPrint = F("Page ");
        if (i < 10) toPrint+="0";
        toPrint += (String)i; 
        GUIobj->printConsole(toPrint, TFT_YELLOW, 0, 0);
@@ -734,49 +759,49 @@ void ntgWrite(){
  String toPrint;
  String urlToWrite="";
 
- GUIobj->printConsole(F("Enter URL to write"), TFT_MAGENTA, 0, 0);
+ GUIobj->printConsole(printEnterUrl, TFT_MAGENTA, 0, 0);
  while (urlToWrite=="") urlToWrite = GUIobj->getUserInput();
  urlToWrite = urlToWrite.substring(0,38);
  GUIobj->printConsole(urlToWrite, TFT_YELLOW, 0, 0);
  
- GUIobj->printConsole(F("Waiting for NTAG to write"), TFT_YELLOW, 0, 0);
+ GUIobj->printConsole(printWaitingNtagToWrite, TFT_YELLOW, 0, 0);
   
   if (!nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uidLength)){
-    GUIobj->printConsole(F("Reading ERROR"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printWrittingError, TFT_RED, 0, 0);
     return;}
   
   if (uidLength!=7){
-    GUIobj->printConsole(F("Not NTAG"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printNotNtag, TFT_RED, 0, 0);
     return;}
 
-  GUIobj->printConsole(F("Writting NTAG..."), TFT_MAGENTA, 0, 0);
+  GUIobj->printConsole(printWrittingNtag, TFT_MAGENTA, 0, 0);
      
   memset(ntgdta, 0, 4);
   if (!nfc.ntag2xx_ReadPage(3, ntgdta)){
-    GUIobj->printConsole(F("Reading ERROR"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printReadingError, TFT_RED, 0, 0);
     return;}
   
   if (!((ntgdta[0] == 0xE1) && (ntgdta[1] == 0x10))){
-    GUIobj->printConsole(F("NTAG structure error"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printNtagStructureError, TFT_RED, 0, 0);
     return;}
 
-  toPrint = "NTAG detected, bytes ";
+  toPrint = printNtagDetected;
   toPrint += (String)(ntgdta[2]*8);
   GUIobj->printConsole(toPrint, TFT_MAGENTA, 0, 0);
-  GUIobj->printConsole(F("Erasing old..."), TFT_MAGENTA, 0, 0);
+  GUIobj->printConsole(printErasingOld, TFT_MAGENTA, 0, 0);
           
   for (uint8_t i = 4; i < (ntgdta[2]*2)+4; i++) {
      memset(ntgdta, 0, 4);
      if (!nfc.ntag2xx_WritePage(i, ntgdta)){
-       GUIobj->printConsole(F("Writting ERROR"), TFT_RED, 0, 0);
+       GUIobj->printConsole(printWrittingError, TFT_RED, 0, 0);
        return;}
 
-  GUIobj->printConsole(F("Writting..."), TFT_MAGENTA, 0, 0);
+  GUIobj->printConsole(printWritting, TFT_MAGENTA, 0, 0);
 
   if(!nfc.ntag2xx_WriteNDEFURI(ndefprefix, (char *)urlToWrite.c_str(), ntgdta[2]*8))
-    GUIobj->printConsole(F("Writting ERROR"), TFT_RED, 0, 0);
+    GUIobj->printConsole(printWrittingError, TFT_RED, 0, 0);
   else 
-    GUIobj->printConsole(F("Writting OK"), TFT_GREEN, 0, 0);
+    GUIobj->printConsole(printWrittingOk, TFT_GREEN, 0, 0);
   }
 }
 
@@ -785,11 +810,11 @@ void ntgWrite(){
 
 void loop() {
   GUIobj->printConsole("", TFT_GREEN, 1, 0);    
-  GUIobj->printConsole(F("Mifare: R-read W-write"), TFT_GREEN, 1, 0);
-  GUIobj->printConsole(F("B-writeblock O-show F-format"), TFT_GREEN, 1, 0);
-  GUIobj->printConsole(F("NTAG: E-read I-write"), TFT_YELLOW, 1, 0);
-  GUIobj->printConsole(F("H-show A-erase M-format"), TFT_YELLOW, 1, 0);
-  GUIobj->printConsole(F("Command?"), TFT_MAGENTA, 1, 0);
+  GUIobj->printConsole(printMenuLine1, TFT_GREEN, 1, 0);
+  GUIobj->printConsole(printMenuLine2, TFT_GREEN, 1, 0);
+  GUIobj->printConsole(printMenuLine3, TFT_YELLOW, 1, 0);
+  GUIobj->printConsole(printMenuLine4, TFT_YELLOW, 1, 0);
+  GUIobj->printConsole(printMenuCommand, TFT_MAGENTA, 1, 0);
 
   String rdCommand = "";
   while (rdCommand == "")
