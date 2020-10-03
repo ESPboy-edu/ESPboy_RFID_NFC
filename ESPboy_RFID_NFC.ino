@@ -519,6 +519,7 @@ void writeMemory(){
 
 
 void showMemory(){ 
+ char conv[2]={0,0};
   GUIobj->printConsole(printShowStored, TFT_YELLOW, 0, 0);
   delay(1000);
   for (uint8_t currentblock = 0; currentblock < 64; currentblock++){
@@ -552,6 +553,14 @@ void showMemory(){
        }
  
        GUIobj->printConsole(capitaliseString(toPrint), TFT_WHITE, 0, 0);
+
+       toPrint="";
+       conv[0] = 0;
+       for (uint8_t i=0; i<16; i++) {
+         if (ntgdata[currentblock][i]>0x19 && data[currentblock][i]<0x7F) conv[0] = data[currentblock][i];
+         else conv[0]='.';
+         toPrint += conv;}
+       GUIobj->printConsole(toPrint, TFT_BLUE, 0, 0);
   }
 }
 
@@ -723,29 +732,35 @@ void ntgFormat(){
 }
 
 
+
+
+
 void ntgShow(){
-  GUIobj->printConsole(printOk, TFT_YELLOW, 0, 0);
+  GUIobj->printConsole(printShowStored, TFT_YELLOW, 0, 0);
   delay(1000);
-    
-    for (uint8_t i = 0; i < 42; i++) {
-          
-       String toPrint = F("Page ");
-       if (i < 10) toPrint+="0";
-       toPrint += (String)i; 
-       GUIobj->printConsole(toPrint, TFT_YELLOW, 0, 0);
-
-       toPrint = "";
-       for (uint8_t j=0; j<4; j++) {
-         if (ntgdata[i][j] < 16) toPrint += "0";
-         toPrint += String(ntgdata[i][j], HEX);
-         toPrint += " ";}
- 
+  for (uint8_t currentblock = 0; currentblock < 42; currentblock++){
+       delay(1);
+       if(GUIobj->getKeys()){
+          GUIobj->printConsole(printBreak, TFT_RED, 0, 0);
+          return;}
+       String toPrint = "Page: ";
+       if(currentblock < 10) toPrint += "0";
+       toPrint += (String)(currentblock);
+       GUIobj->printConsole(toPrint, TFT_YELLOW, 1, 0);
+      
+       toPrint="";
+       for (uint8_t i=0; i<4; i++) {
+         if (data[currentblock][i] < 16) toPrint += "0";
+         toPrint += String(data[currentblock][i], HEX);
+         toPrint += " ";
+       }
+       
        GUIobj->printConsole(capitaliseString(toPrint), TFT_WHITE, 0, 0);
-
+       
        toPrint="";
        char conv[2]={0,0};
-       for (uint8_t j=0; j<4; i++) {
-         if (ntgdata[i][j]>0x19 && data[i][j]<0x7F) conv[0] = data[i][j];
+       for (uint8_t i=0; i<4; i++) {
+         if (ntgdata[currentblock][i]>0x19 && data[currentblock][i]<0x7F) conv[0] = data[currentblock][i];
          else conv[0]='.';
          toPrint += conv;}
        GUIobj->printConsole(toPrint, TFT_BLUE, 0, 0);
