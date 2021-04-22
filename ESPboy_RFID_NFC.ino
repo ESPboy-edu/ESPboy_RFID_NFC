@@ -12,7 +12,6 @@ https://hackaday.io/project/164830-espboy-games-iot-stem-for-education-fun
 #include <ESP8266WiFi.h>
 #include "lib/ESPboyLogo.h"
 #include "ESPboyGUI.h"
-#include "ESPboyOTA.h"
 
 #define PN532_IRQ   (15)
 #define PN532_RESET (-1)  
@@ -125,7 +124,6 @@ Adafruit_MCP23017 mcp;
 TFT_eSPI tft;
 Adafruit_PN532 nfc(PN532_IRQ, PN532_RESET);
 ESPboyGUI* GUIobj = NULL;
-ESPboyOTA* OTAobj = NULL;
 
 uint8_t data[64][16];
 uint8_t ntgdata[42][4];
@@ -218,9 +216,7 @@ void setup() {
 
   delay(1000);
 
-//OTA init
   GUIobj = new ESPboyGUI(&tft, &mcp);
-  if (GUIobj->getKeys()) OTAobj = new ESPboyOTA(GUIobj);
 
 //init rfid/nfc
   nfc.begin();
