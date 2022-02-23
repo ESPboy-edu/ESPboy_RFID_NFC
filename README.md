@@ -2,7 +2,7 @@
 
 [Demo video](https://youtu.be/YB7mS0z7oJQ)
 
-The ESPboy PN532 NFC/RFID module allows you to read/write RFID/NFC cards
+The ESPboy PN532 RFID/NFC module allows you to read/write RFID/NFC cards
 
 - 1k, 4k, Ultralight and DesFire cards
 - ISO/IEC 14443-4 cards as CD97BX, CD light, Desfire, P5CN072 (SMX)
@@ -20,7 +20,7 @@ You can buy this module ready-made or make it yourself.
 
 ## 1. Buy PN532 NFC/RFID
 
-- Red [link to buy](https://aliexpress.ru/wholesale?SearchText=PN532)
+- Red PN532 RFID/NFC [link to buy](https://aliexpress.ru/wholesale?SearchText=PN532)
 
 ![1](pics/PN532_1.jpg)
 
