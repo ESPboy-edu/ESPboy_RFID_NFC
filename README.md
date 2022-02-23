@@ -22,9 +22,9 @@ You can buy this module ready-made or make it yourself.
 
 - Red [link to buy](https://aliexpress.ru/wholesale?SearchText=PN532)
 
-![1](pics/PN532_1)
+![1](pics/PN532_1.jpg)
 
-![2](pics/PN532_2)
+![2](pics/PN532_2.jpg)
 
 
 
@@ -61,5 +61,3 @@ NOTE: Before compilation, set Arduino IDE settings
 - [Contact: espboy.edu@gmail.com](mailto:espboy.edu@gmail.com)
 
 
-
-[Check the description here](https://community.espboy.com/t/espboy-sub1ghz-inspector-cc1101-module/70/7)
