@@ -12,9 +12,9 @@ The ESPboy PN532 RFID/NFC module allows you to read/write RFID/NFC cards
 
 You can buy this module ready-made or make it yourself.
 
-![1](pics/image0.jpg)
+![1](pics/IMG_1.jpg)
 
-![2](pics/image1.jpg)
+![2](pics/IMG_2.jpg)
 
 
 
@@ -30,15 +30,11 @@ You can buy this module ready-made or make it yourself.
 
 ## 2. Connect PN532 NFC/RFID to ESPboy
 
-- 5v     ->  VCC
-- Gnd    ->  GND
-- MISO   ->  MI (D6, GPIO12, MISO)
-- SI     ->  MO (D7, GPIO13, MOSI)
-- SCK    ->  SC (D8, GPIO15)
-- XCS    ->  B5 (MCP23017 B5)
-- XRESET ->  RST 
-- XDCS   ->  B7 (MCP23017 B7)
-- DREQ   ->  B4 (MCP23017 B4)
+- VCC    ->  VCC
+- GND    ->  GND
+- SCL    ->  SCL (D1, GPIO5, SCL)
+- SDA    ->  SDA (D2, GPIO4, SDA
+- IRQ    ->  SS (D8, GPIO15, SS)
 
 
 ## 3. Upload this firmware
