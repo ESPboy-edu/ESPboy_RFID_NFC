@@ -28,8 +28,13 @@ You can buy this module ready-made or make it yourself.
 
 
 
-## 2. Connect PN532 NFC/RFID to ESPboy
+## 2. Connect PN532 NFC/RFID to ESPboy and set switches
 
+SET DIP SWITCHES:
+Switch1 - ON
+Switch2 - OFF
+
+CONNECT:
 - VCC    ->  VCC
 - GND    ->  GND
 - SCL    ->  SCL (D1, GPIO5, SCL)
