@@ -14,7 +14,7 @@ You can buy this module ready-made or make it yourself.
 
 ![1](pics/IMG_1.jpg)
 
-![2](pics/IMG_2.jpg)
+![2](pics/IMG_3.jpg)
 
 
 
