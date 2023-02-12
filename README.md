@@ -22,9 +22,9 @@ You can buy this module ready-made or make it yourself.
 
 - Red PN532 RFID/NFC [link to buy](https://aliexpress.ru/wholesale?SearchText=PN532)
 
-![1](pics/PN532_1.jpg)
+![3](pics/IMG_4.jpg)
 
-![2](pics/PN532_2.jpg)
+![4](pics/IMG_5.jpg)
 
 
 
